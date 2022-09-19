@@ -381,7 +381,8 @@ contract Project is IProject {
             .div(properties.tokenTotalSupply * 10**properties.tokenDecimal)
             .mul(balance);
 
-        uint256 roi = properties.roi.div(100).mul(capital);
+        // [properties.roi.div(100).mul(capital)] = 0
+        uint256 roi = capital.mul(properties.roi).div(100);
 
         // transfer the rewarded token to this project
         token.transferFrom(_contributor, address(this), balance);
