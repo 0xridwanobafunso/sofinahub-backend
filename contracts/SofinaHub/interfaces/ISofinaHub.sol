@@ -51,10 +51,11 @@ interface ISofinaHub {
         uint256 amount
     );
 
+    event LogToggleVerificationSent(string message);
+
     event LogFailure(string message);
 
     /// @dev
-    ///
     function create(SofinaHubOptions memory sofinaHub)
         external
         returns (IProject projectAddress);
@@ -84,5 +85,7 @@ interface ISofinaHub {
         returns (bool successful);
 
     /// @dev
-    function toggleVerify(address payable _projectAddress) external;
+    function toggleVerify(address payable _projectAddress)
+        external
+        returns (bool successful);
 }

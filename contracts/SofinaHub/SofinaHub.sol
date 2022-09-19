@@ -167,7 +167,7 @@ contract SofinaHub is ISofinaHub {
             return true;
         } else {
             emit LogFailure(
-                "[SOFINAHUB]: Project capital and ROI did not send successfully"
+                "[SOFINAHUB]: Project capital and ROI funds are not completed"
             );
 
             return false;
@@ -198,9 +198,29 @@ contract SofinaHub is ISofinaHub {
 
     /// @dev
     /// Verify property against scamming project
-    function toggleVerify(address payable _projectAddress) public onlyOwner {
-        IProject deployedProject = Project(_projectAddress);
+    function toggleVerify(address payable _projectAddress)
+        public
+        onlyOwner
+        returns (bool successful)
+    {
+        Project deployedProject = Project(_projectAddress);
 
-        deployedProject.toggleVerify();
+        // check that there is actually a project contract at that address
+        require(deployedProject.sofinaHub() != address(0), "Project not exist");
+
+        // toggle verification
+        if (deployedProject.toggleVerify()) {
+            emit LogToggleVerificationSent(
+                "[SOFINAHUB]: Verification sent successfully"
+            );
+
+            return true;
+        } else {
+            emit LogFailure(
+                "[SOFINAHUB]: Verification did not send successfully"
+            );
+
+            return false;
+        }
     }
 }

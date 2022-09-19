@@ -186,8 +186,6 @@ contract Project is IProject {
                 "[SOFINAHUB_PROJECT]: Project deadline has passed, problem returning contribution"
             );
 
-            payout();
-
             return false;
         }
 
@@ -252,9 +250,6 @@ contract Project is IProject {
     {
         uint256 amount = totalFunding;
 
-        // prevent re-entrancy attack
-        totalFunding = 0;
-
         if (properties.creator.send(amount)) {
             return true;
         } else {
@@ -286,10 +281,25 @@ contract Project is IProject {
             "[SOFINAHUB_PROJECT]: Refund is not possible if project has met goal"
         );
 
+        // token
+        IERC20 token = Token(properties.tokenAddress);
+
+        // contributor token balance
+        uint256 balance = token.balanceOf(_contributor);
+
+        // check if the contributor token balance is greater than zero
+        require(
+            balance > 0,
+            "[SOFINAHUB_PROJECT]: Contributor token balance must be greater than zero"
+        );
+
         uint256 amount = contributors[_contributor];
 
         // prevent re-entrancy attack
         contributors[_contributor] = 0;
+
+        // transfer the rewarded token to this project
+        token.transferFrom(_contributor, address(this), balance);
 
         if (payable(_contributor).send(amount)) {
             emit LogRefundIssued(address(this), _contributor, amount);
@@ -328,10 +338,15 @@ contract Project is IProject {
             .mul(properties.goal)
             .add(properties.goal);
 
-        require(
-            msg.value >= expectedFunds,
-            "[SOFINAHUB_PROJECT]: Project capital and ROI funds are not completed"
-        );
+        if (msg.value < expectedFunds) {
+            // return funds to creator
+            require(
+                _creator.send(msg.value),
+                "[SOFINAHUB_PROJECT]: Problem returning creator fund"
+            );
+
+            return false;
+        }
 
         emit LogDeposited(
             "[SOFINAHUB_PROJECT]: Project capital and ROI funds deposited successfully",
@@ -357,7 +372,7 @@ contract Project is IProject {
         // check if the contributor token balance is greater than zero
         require(
             balance > 0,
-            "[SOFINAHUB_PROJECT]: Contributor token balance  must be greater than zero"
+            "[SOFINAHUB_PROJECT]: Contributor token balance must be greater than zero"
         );
 
         // capital and roi
@@ -368,6 +383,7 @@ contract Project is IProject {
 
         uint256 roi = properties.roi.div(100).mul(capital);
 
+        // transfer the rewarded token to this project
         token.transferFrom(_contributor, address(this), balance);
 
         if (payable(_contributor).send(capital.add(roi))) {
