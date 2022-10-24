@@ -13,9 +13,9 @@ module.exports = {
       port: 7545,
       network_id: '*',
     },
-    ropsten: {
+    goerli: {
       provider: () => new HDWalletProvider(MNEMONIC, INFURA_API_URL),
-      network_id: 3,
+      network_id: 5,
       gas: 5500000,
       networkCheckTimeoutnetworkCheckTimeout: 10000,
       timeoutBlocks: 200,
