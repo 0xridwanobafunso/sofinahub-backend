@@ -5,7 +5,7 @@ import "./interfaces/ISofinaHub.sol";
 import "../Project/Project.sol";
 import "../Project/interfaces/IProject.sol";
 
-contract SofinaHub is ISofinaHub {
+contract SofinaHubV2 is ISofinaHub {
     /// @dev owner
     address private _owner;
 
